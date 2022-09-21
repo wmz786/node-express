@@ -1,16 +1,28 @@
 const express = require("express");
-const path = require("node:path");
+const { products } = require("./data");
 
 const app = express();
 
-app.use(express.static("./navbar-app"));
-
 app.get("/", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "./navbar-app/index.html"));
+  res.send("<h1>Home page</h1><a href='/api/products'>Products</a>");
 });
 
-app.all("*", (req, res) => {
-  res.status(404).send("resource not found");
+app.get("/api/products", (req, res) => {
+  const newProducts = products.map((product) => {
+    const { id, name, image } = product;
+    return { id, name, image };
+  });
+  res.json(newProducts);
+});
+
+app.get("/api/products/:pid", (req, res) => {
+  const singleProducts = products.find(
+    (product) => product.id == req.params.pid
+  );
+  if (!singleProducts) {
+    return res.status(404).send("Product not found");
+  }
+  return res.json(singleProducts);
 });
 
 app.listen(3000);
