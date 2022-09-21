@@ -17,12 +17,30 @@ app.get("/api/products", (req, res) => {
 
 app.get("/api/products/:pid", (req, res) => {
   const singleProducts = products.find(
-    (product) => product.id == req.params.pid
+    (product) => product.id === Number(req.params.pid)
   );
   if (!singleProducts) {
     return res.status(404).send("Product not found");
   }
   return res.json(singleProducts);
+});
+
+app.get("/api/v1/query", (req, res) => {
+  const { search, limits } = req.query;
+  let sortedProducts = [...products];
+  if (search) {
+    sortedProducts = sortedProducts.filter((product) => {
+      return product.name.startsWith(search);
+    });
+  }
+  if (limits) {
+    sortedProducts = sortedProducts.slice(0, Number(limits));
+  }
+  if (sortedProducts.length < 1) {
+    // res.status(200).send("No products matched the query");
+    res.status(200).json({ success: true, data: [] });
+  }
+  return res.status(200).json(sortedProducts);
 });
 
 app.listen(3000);
